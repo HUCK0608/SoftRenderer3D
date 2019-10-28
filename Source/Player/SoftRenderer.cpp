@@ -128,6 +128,13 @@ void SoftRenderer::Update()
 
 void SoftRenderer::BindImplClass()
 {
+	//BindImpl2DClass();
+	BindImpl3DClass();
+	
+}
+
+void SoftRenderer::BindImpl2DClass()
+{
 	Impl2D = std::make_unique<SoftRendererImpl2D>(this);
 	if (nullptr != Impl2D)
 	{
@@ -138,3 +145,14 @@ void SoftRenderer::BindImplClass()
 	}
 }
 
+void SoftRenderer::BindImpl3DClass()
+{
+	Impl3D = std::make_unique<SoftRendererImpl3D>(this);
+	if (nullptr != Impl3D)
+	{
+		using namespace std::placeholders;
+		RenderFrameFunc = std::bind(&SoftRendererImpl3D::RenderFrameImpl, Impl3D.get());
+		UpdateFunc = std::bind(&SoftRendererImpl3D::UpdateImpl, Impl3D.get(), _1);
+		IsImplBinded = true;
+	}
+}

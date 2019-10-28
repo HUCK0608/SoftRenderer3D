@@ -5,6 +5,15 @@
 #include "LinearColor.h"
 #include "RSIDataTypes.h"
 
+struct VertexData
+{
+	Vector3 Position;
+	Vector2 UV;
+	LinearColor color = LinearColor::Error;
+
+	VertexData(const Vector3& position) { Position = position; }
+};
+
 class RenderingSoftwareInterface
 {
 public:

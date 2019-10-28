@@ -4,6 +4,7 @@
 #include <functional>
 #include "InputManager.h" 
 #include "SoftRendererImpl2D.h"
+#include "SoftRendererImpl3D.h"
 
 class SoftRenderer
 {
@@ -37,6 +38,9 @@ private:
 	FORCEINLINE void Update();
 	FORCEINLINE void RenderFrame();
 
+	void BindImpl2DClass();
+	void BindImpl3DClass();
+
 private:
 	// Variable to detect initialization
 	bool IsPerformanceCheckInitialized = false;
@@ -63,7 +67,9 @@ private:
 
 	// Renderer Implement Class
 	friend class SoftRendererImpl2D;
+	friend class SoftRendererImpl3D;
 	std::unique_ptr<SoftRendererImpl2D> Impl2D;
+	std::unique_ptr<SoftRendererImpl3D> Impl3D;
 
 	// Impl Functions for Rendering Logic
 	std::function<void()> RenderFrameFunc;
