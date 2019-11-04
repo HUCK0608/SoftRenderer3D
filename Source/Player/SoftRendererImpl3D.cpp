@@ -20,37 +20,37 @@ void SoftRendererImpl3D::RenderFrameImpl()
 	assert(RSI != nullptr && RSI->IsInitialized() && !ScreenSize.HasZero());
 
 	const int vertexCount = 24;
-	VertexData v[vertexCount] = {
-		// Front
-		VertexData(Vector3(0.5f, -0.5f, 0.5f)),
-		VertexData(Vector3(0.5f, 0.5f, 0.5f)),
-		VertexData(Vector3(0.5f, 0.5f, -0.5f)),
-		VertexData(Vector3(0.5f, -0.5f, -0.5f)),
+	static Vector4 v[vertexCount] = {
+		// Front 
+		Vector4(0.5f, -0.5f, 0.5f),
+		Vector4(0.5f, 0.5f, 0.5f),
+		Vector4(0.5f, 0.5f, -0.5f),
+		Vector4(0.5f, -0.5f, -0.5f),
 		// Left
-		VertexData(Vector3(-0.5f, -0.5f, 0.5f)),
-		VertexData(Vector3(-0.5f, 0.5f, 0.5f)),
-		VertexData(Vector3(0.5f, 0.5f, 0.5f)),
-		VertexData(Vector3(0.5f, -0.5f, 0.5f)),
+		Vector4(-0.5f, -0.5f, 0.5f),
+		Vector4(-0.5f, 0.5f, 0.5f),
+		Vector4(0.5f, 0.5f, 0.5f),
+		Vector4(0.5f, -0.5f, 0.5f),
 		// Right
-		VertexData(Vector3(0.5f, -0.5f, -0.5f)),
-		VertexData(Vector3(0.5f, 0.5f, -0.5f)),
-		VertexData(Vector3(-0.5f, 0.5f, -0.5f)),
-		VertexData(Vector3(-0.5f, -0.5f, -0.5f)),
+		Vector4(0.5f, -0.5f, -0.5f),
+		Vector4(0.5f, 0.5f, -0.5f),
+		Vector4(-0.5f, 0.5f, -0.5f),
+		Vector4(-0.5f, -0.5f, -0.5f),
 		// Back
-		VertexData(Vector3(-0.5f, -0.5f, -0.5f)),
-		VertexData(Vector3(-0.5f, 0.5f, -0.5f)),
-		VertexData(Vector3(-0.5f, 0.5f, 0.5f)),
-		VertexData(Vector3(-0.5f, -0.5f, 0.5f)),
+		Vector4(-0.5f, -0.5f, -0.5f),
+		Vector4(-0.5f, 0.5f, -0.5f),
+		Vector4(-0.5f, 0.5f, 0.5f),
+		Vector4(-0.5f, -0.5f, 0.5f),
 		// Top
-		VertexData(Vector3(0.5f, 0.5f, 0.5f)),
-		VertexData(Vector3(-0.5f, 0.5f, 0.5f)),
-		VertexData(Vector3(-0.5f, 0.5f, -0.5f)),
-		VertexData(Vector3(0.5f, 0.5f, -0.5f)),
+		Vector4(0.5f, 0.5f, 0.5f),
+		Vector4(-0.5f, 0.5f, 0.5f),
+		Vector4(-0.5f, 0.5f, -0.5f),
+		Vector4(0.5f, 0.5f, -0.5f),
 		// Bottom
-		VertexData(Vector3(-0.5f, -0.5f, 0.5f)),
-		VertexData(Vector3(0.5f, -0.5f, 0.5f)),
-		VertexData(Vector3(0.5f, -0.5f, -0.5f)),
-		VertexData(Vector3(-0.5f, -0.5f, -0.5f))
+		Vector4(-0.5f, -0.5f, 0.5f),
+		Vector4(0.5f, -0.5f, 0.5f),
+		Vector4(0.5f, -0.5f, -0.5f),
+		Vector4(-0.5f, -0.5f, -0.5f)
 	};
 
 	const int triangleCount = 12;
@@ -64,6 +64,33 @@ void SoftRendererImpl3D::RenderFrameImpl()
 	 20, 22, 21, 20, 23, 22
 	};
 	
+	static float a = (float)ScreenSize.X / (float)ScreenSize.Y;
+	static float repA = (float)ScreenSize.Y / (float)ScreenSize.X;
+	static float d = 1.f / tanf(Math::Deg2Rad(FOV) * 0.5f);
+
+	for (int t = 0; t < triangleCount; t++)
+	{
+		Vector4 tp[3];
+		tp[0] = v[i[t * 3]];
+		tp[1] = v[i[t * 3 + 1]];
+		tp[2] = v[i[t * 3 + 2]];
+
+		for (int ti = 0; ti < 3; ti++)
+		{
+			tp[ti] = FinalMatrix * tp[ti];
+
+			float repZ = 1.f / -tp[ti].Z;
+			tp[ti].Y = tp[ti].Y * d * repZ;
+			tp[ti].X = tp[ti].X * d * repZ * repA;
+
+			tp[ti].X *= (ScreenSize.X * 0.5f);
+			tp[ti].Y *= (ScreenSize.Y * 0.5f);
+		}
+
+		RSI->DrawLine(tp[0].ToVector2(), tp[1].ToVector2(), LinearColor::Red);
+		RSI->DrawLine(tp[0].ToVector2(), tp[2].ToVector2(), LinearColor::Red);
+		RSI->DrawLine(tp[1].ToVector2(), tp[2].ToVector2(), LinearColor::Red);
+	}
 }
 
 void SoftRendererImpl3D::UpdateImpl(float DeltaSeconds)
@@ -72,7 +99,7 @@ void SoftRendererImpl3D::UpdateImpl(float DeltaSeconds)
 	static GameObject quad;
 	quad.GetTransform().SetScale(Vector3::One * 100.f);
 
-	static float moveSpeed = 100.f;
+	static float moveSpeed = 500.f;
 	static float rotationSpeed = 180.f;
 
 	quad.GetTransform().AddPosition(Vector3::UnitZ * (InputManager.GetYAxis() * moveSpeed * DeltaSeconds));
@@ -82,4 +109,5 @@ void SoftRendererImpl3D::UpdateImpl(float DeltaSeconds)
 
 	Camera camera;
 	camera.GetGameObject().GetTransform().SetPosition(Vector3(0.f, 500.f, -500.f));
+	FinalMatrix = camera.GetViewMatrix(quad) * TRSMat;
 }

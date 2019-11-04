@@ -25,4 +25,5 @@ private:
 
 	// Final Matrix
 	Matrix4x4 FinalMatrix;
+	float FOV = 60.f;
 };
