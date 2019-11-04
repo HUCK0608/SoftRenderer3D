@@ -5,3 +5,8 @@ Transform & GameObject::GetTransform()
 {
 	return Transform;
 }
+
+Mesh & GameObject::GetMesh()
+{
+	return Mesh;
+}

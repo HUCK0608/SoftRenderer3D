@@ -6,10 +6,10 @@ class Camera
 public:
 	Camera() {}
 
-	GameObject& GetGameObject();
+	Transform& GetTransform();
 
 	Matrix4x4 GetViewMatrix(GameObject& LookAt);
 
 private:
-	GameObject gameObject;
+	Transform transform;
 };
