@@ -1,12 +1,8 @@
+
 #include "Precompiled.h"
 #include "GameObject.h"
 
-Transform & GameObject::GetTransform()
+void GameObject::SetMesh(Mesh * InMeshPtr)
 {
-	return Transform;
-}
-
-Mesh & GameObject::GetMesh()
-{
-	return Mesh;
+	SharedMeshPtr = InMeshPtr;
 }

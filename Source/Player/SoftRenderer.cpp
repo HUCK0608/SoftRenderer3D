@@ -130,7 +130,6 @@ void SoftRenderer::BindImplClass()
 {
 	//BindImpl2DClass();
 	BindImpl3DClass();
-	
 }
 
 void SoftRenderer::BindImpl2DClass()
@@ -156,3 +155,5 @@ void SoftRenderer::BindImpl3DClass()
 		IsImplBinded = true;
 	}
 }
+
+

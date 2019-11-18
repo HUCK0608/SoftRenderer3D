@@ -5,15 +5,6 @@
 #include "LinearColor.h"
 #include "RSIDataTypes.h"
 
-struct VertexData
-{
-	Vector3 Position;
-	Vector2 UV;
-	LinearColor color = LinearColor::Error;
-
-	VertexData(const Vector3& position) { Position = position; }
-};
-
 class RenderingSoftwareInterface
 {
 public:
@@ -27,7 +18,14 @@ public:
 	virtual void EndFrame() = 0;
 
 	virtual void DrawPoint(const Vector2& InVectorPos, const LinearColor& InColor) = 0;
-	virtual void DrawLine(const Vector2& InStartPos, const Vector2& InEndPos, const LinearColor& InColor) = 0;
+	virtual void DrawLine(const Vector2 & InStartPos, const Vector2 & InEndPos, const LinearColor & InColor) = 0;
+
+	virtual void SetUniformMatrix(Matrix4x4* InMatrixData) = 0;
+	virtual void SetVertexBuffer(VertexData* InVertexData) = 0;
+	virtual void SetIndexBuffer(int* InIndexData) = 0;
+	virtual void DrawLinePrimitive(UINT InVertexSize, UINT InIndexSize, float InThickness = 1.f) = 0;
+	virtual void DrawTrianglePrimitive(UINT InVertexSize, UINT InIndexSize) = 0;
+
 
 	virtual void DrawFullVerticalLine(int InX, const LinearColor& InColor) = 0;
 	virtual void DrawFullHorizontalLine(int InY, const LinearColor& InColor) = 0;

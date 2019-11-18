@@ -1,15 +1,21 @@
 #pragma once
-#include "GameObject.h"
+
+#include "Transform.h"
 
 class Camera
 {
 public:
-	Camera() {}
+	Camera() = default;
 
-	Transform& GetTransform();
-
-	Matrix4x4 GetViewMatrix(GameObject& LookAt);
+public:
+	Transform& GetTransform() { return Transform; }
+	Matrix4x4 GetLookAtMatrix(GameObject& InTargetObject);
+	Matrix4x4 GetPerspectiveMatrix(int InScreenSizeX, int InScreenSizeY);
 
 private:
-	Transform transform;
+	Transform Transform;
+	float FOV = 60.f;
+	float NearZ = 5.5f;
+	float FarZ = 100.f;
 };
+

@@ -9,102 +9,212 @@ SoftRendererImpl3D::SoftRendererImpl3D(SoftRenderer* InOwner)
 	ScreenSize = InOwner->CurrentScreenSize;
 	InputManager = InOwner->GetInputManager();
 
-	const int gameObjectCount = 2;
-	GameObject box = GameObject(Box());
-	box.GetTransform().SetScale(Vector3::One * 100.f);
-	GameObject box2 = GameObject(Box());
-	box2.GetTransform().SetScale(Vector3::One * 50.0f);
-	box2.GetTransform().SetPosition(Vector3(150.f, 0.f, 0.f));
-
-	GameObject gameObjects[gameObjectCount] = {
-		box,
-		box2
-	};
-
-	GameObjects = gameObjects;
-	GameObjectCount = gameObjectCount;
+	LoadResource();
+	LoadScene();
 }
 
 SoftRendererImpl3D::~SoftRendererImpl3D()
 {
+	//for (auto& g : Scene)
+	//{
+	//	g.GetMesh().ReleaseAllBuffers();
+	//}
 }
 
+void SoftRendererImpl3D::LoadResource()
+{
+	// Load Mesh Resource
+	const int vertexCount = 24;
+	const int triangleCount = 12;
+	const int indexCount = triangleCount * 3;
+
+	Vector4* v = new Vector4[vertexCount] {
+		// Right 
+		Vector4(0.5f, -0.5f, 0.5f),
+		Vector4(0.5f, 0.5f, 0.5f),
+		Vector4(0.5f, 0.5f, -0.5f),
+		Vector4(0.5f, -0.5f, -0.5f),
+		// Front
+		Vector4(-0.5f, -0.5f, 0.5f),
+		Vector4(-0.5f, 0.5f, 0.5f),
+		Vector4(0.5f, 0.5f, 0.5f),
+		Vector4(0.5f, -0.5f, 0.5f),
+		// Back
+		Vector4(0.5f, -0.5f, -0.5f),
+		Vector4(0.5f, 0.5f, -0.5f),
+		Vector4(-0.5f, 0.5f, -0.5f),
+		Vector4(-0.5f, -0.5f, -0.5f),
+		// Left
+		Vector4(-0.5f, -0.5f, -0.5f),
+		Vector4(-0.5f, 0.5f, -0.5f),
+		Vector4(-0.5f, 0.5f, 0.5f),
+		Vector4(-0.5f, -0.5f, 0.5f),
+		// Top
+		Vector4(0.5f, 0.5f, 0.5f),
+		Vector4(-0.5f, 0.5f, 0.5f),
+		Vector4(-0.5f, 0.5f, -0.5f),
+		Vector4(0.5f, 0.5f, -0.5f),
+		// Bottom
+		Vector4(-0.5f, -0.5f, 0.5f),
+		Vector4(0.5f, -0.5f, 0.5f),
+		Vector4(0.5f, -0.5f, -0.5f),
+		Vector4(-0.5f, -0.5f, -0.5f)
+	};
+
+	Color32* c = new Color32[vertexCount] {
+		// Right
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		// Front
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		// Back
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		// Left
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		// Top
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		// Bottom
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0),
+		Color32(0, 0, 0)
+	};
+
+	int* i = new int[indexCount] {
+	 0, 2, 1, 0, 3, 2,
+	 4, 6, 5, 4, 7, 6,
+	 8, 10, 9, 8, 11, 10,
+	 12, 14, 13, 12, 15, 14,
+	 16, 18, 17, 16, 19, 18,
+	 20, 22, 21, 20, 23, 22
+	};
+
+	SharedCubeMesh = std::make_unique<Mesh>();
+	SharedCubeMesh.get()->SetMesh(vertexCount, indexCount, v, i);
+	SharedCubeMesh.get()->SetColor(c);
+
+	delete[] v;
+	delete[] i;
+}
+
+void SoftRendererImpl3D::LoadScene()
+{
+	// Setup Game Scene 
+	GameObject* player = new GameObject();
+	player->SetMesh(SharedCubeMesh.get());
+	player->GetTransform().SetPosition(Vector3::Zero);
+	player->GetTransform().SetRotation(Rotator(0.f, 0.f, 0.f));
+	player->GetTransform().SetScale(Vector3::One * 100.f);
+	Scene.emplace_back(player);
+
+	for (int i = 0; i < 5; ++i)
+	{
+		GameObject* worldStatic = new GameObject();
+		worldStatic->SetMesh(SharedCubeMesh.get());
+		worldStatic->GetTransform().SetPosition(Vector3(0.f, 0.f, i * 100.f));
+		worldStatic->GetTransform().SetScale(Vector3::One * 100.f);
+
+		Scene.emplace_back(worldStatic);
+	}
+
+	Camera.GetTransform().SetPosition(Vector3(500.f, 500.f, -500.f));
+}
 
 void SoftRendererImpl3D::RenderFrameImpl()
 {
 	assert(RSI != nullptr && RSI->IsInitialized() && !ScreenSize.HasZero());
 
-	for (int i = 0; i < GameObjectCount; i++)
+	auto player = Scene[0].get();
+	Matrix4x4 vMat = Camera.GetLookAtMatrix(*player);
+	Matrix4x4 pMat = Camera.GetPerspectiveMatrix(ScreenSize.X, ScreenSize.Y);
+
+	for (auto& g : Scene)
 	{
-		int triangleCount = GameObjects[i].GetMesh().GetIndexCount / 3;
+		Matrix4x4 mMat = g->GetTransform().GetModelingMatrix();
 
-		for (int t = 0; t < triangleCount; t++)
+		Matrix4x4 m[3] = { mMat, vMat, pMat };
+
+		Mesh* meshToRender = player->GetMesh();
+		int vertexCount = meshToRender->GetVertexCount();
+		int indexCount = meshToRender->GetIndexCount();
+		Vector4* meshVertexBuffer = meshToRender->GetVertexBuffer();
+		Color32* meshColorBuffer = meshToRender->GetColorBuffer();
+		int* i = meshToRender->GetIndexBuffer();
+		VertexData* v = new VertexData[vertexCount];
+		for (int vi = 0; vi < vertexCount; ++vi)
 		{
-			Vector4 tp[3];
-			tp[0] = v[i[t * 3]];
-			tp[1] = v[i[t * 3 + 1]];
-			tp[2] = v[i[t * 3 + 2]];
-
-			// 최종행렬 적용
-			for (int ti = 0; ti < 3; ti++)
-			{
-				tp[ti] = FinalMatrix * tp[ti];
-				float repW = 1.f / tp[ti].W;
-				tp[ti].X *= repW;
-				tp[ti].Y *= repW;
-				tp[ti].Z *= repW;
-			}
-
-			// Backface Culling
-			Vector3 edge1 = (tp[1] - tp[0]).ToVector3();
-			Vector3 edge2 = (tp[2] - tp[0]).ToVector3();
-			Vector3 faceNormal = edge1.Cross(edge2).Normalize();
-			static Vector3 cameraDir = -Vector3::UnitZ;
-
-			if (cameraDir.Dot(faceNormal) < 0.f)
-				continue;
-
-			for (int ti = 0; ti < 3; ti++)
-			{
-				tp[ti].X *= (ScreenSize.X * 0.5f);
-				tp[ti].Y *= (ScreenSize.Y * 0.5f);
-			}
-
-			RSI->DrawLine(tp[0].ToVector2(), tp[1].ToVector2(), LinearColor::Red);
-			RSI->DrawLine(tp[0].ToVector2(), tp[2].ToVector2(), LinearColor::Red);
-			RSI->DrawLine(tp[1].ToVector2(), tp[2].ToVector2(), LinearColor::Red);
+			v[vi].Position = meshVertexBuffer[vi];
+			v[vi].Color = LinearColor(meshColorBuffer[vi]);
 		}
+
+		RSI->SetUniformMatrix(m);
+		RSI->SetVertexBuffer(v);
+		RSI->SetIndexBuffer(i);
+		RSI->DrawTrianglePrimitive(vertexCount, indexCount);
+
+		delete[] v;
 	}
+
+	DrawGizmo3D(vMat, pMat);
+	DrawXYPlane(vMat, pMat);
 }
 
 void SoftRendererImpl3D::UpdateImpl(float DeltaSeconds)
 {
-	// 모델링 변환 행렬
-	static GameObject box = GameObject(Box());
-	box.GetTransform().SetScale(Vector3::One * 100.f);
+	// 게임 로직.
+	static float moveSpeed = 1000.f;
+	static float rotateSpeed = 180.f;
 
-	static float moveSpeed = 500.f;
-	static float rotationSpeed = 180.f;
+	auto player = Scene[0].get();
+	Vector3 deltaPos = Vector3::UnitZ * InputManager.GetYAxis() * moveSpeed * DeltaSeconds;
+	float deltaDegree = InputManager.GetXAxis() * rotateSpeed * DeltaSeconds;
+	float deltaDegree2 = InputManager.GetYAxis() * rotateSpeed * DeltaSeconds;
+	player->GetTransform().AddPosition(deltaPos);
+	player->GetTransform().AddYawRotation(deltaDegree);
+}
 
-	box.GetTransform().AddPosition(Vector3::UnitZ * (InputManager.GetYAxis() * moveSpeed * DeltaSeconds));
-	box.GetTransform().AddRotation(Vector3::UnitY * (InputManager.GetXAxis() * rotationSpeed * DeltaSeconds));
+void SoftRendererImpl3D::DrawGizmo3D(Matrix4x4 InVMatrix, Matrix4x4 InPMatrix)
+{
+	const int gizmosVertexCount = 6;
+	VertexData v[gizmosVertexCount] = {
+		VertexData(Vector3::Zero, LinearColor::Red),
+		VertexData(Vector3::UnitX * 500.f, LinearColor::Red),
+		VertexData(Vector3::Zero, LinearColor::Green),
+		VertexData(Vector3::UnitY * 500.f, LinearColor::Green),
+		VertexData(Vector3::Zero, LinearColor::Blue),
+		VertexData(Vector3::UnitZ * 500.f, LinearColor::Blue),
+	};
 
-	Matrix4x4 TRSMat = box.GetTransform().GetTRS();
+	const int gizmosLineCount = 3;
+	const int gizmosIndexCount = gizmosLineCount * 2;
+	int i[gizmosIndexCount] = {
+		0, 1,
+		2, 3,
+		4, 5
+	};
 
-	// 투영 행렬
-	static float repA = (float)ScreenSize.Y / (float)ScreenSize.X;
-	static float d = 1.f / tanf(Math::Deg2Rad(FOV) * 0.5f);
-	static float n = 5.5f;
-	static float f = 100.0f;
-	float repNF = 1.f / (n - f);
-	float k = f / repNF;
-	float l = f * n / repNF;
-	Matrix4x4 pMat(Vector4::UnitX * repA * d, 
-				   Vector4::UnitY * d, 
-				   Vector4(0.f, 0.f, k, -1.f), 
-				   Vector4(0.f, 0.f, l, 0.f));
+	Matrix4x4 m[3] = { Matrix4x4(), InVMatrix, InPMatrix };
 
-	Camera camera;
-	camera.GetTransform().SetPosition(Vector3(0.f, 500.f, -500.f));
-	FinalMatrix = pMat * camera.GetViewMatrix(box) * TRSMat;
+	RSI->SetUniformMatrix(m);
+	RSI->SetVertexBuffer(v);
+	RSI->SetIndexBuffer(i);
+	RSI->DrawLinePrimitive(gizmosVertexCount, gizmosIndexCount);
+}
+
+void SoftRendererImpl3D::DrawXYPlane(Matrix4x4 InVMatrix, Matrix4x4 InPMatrix)
+{
 }

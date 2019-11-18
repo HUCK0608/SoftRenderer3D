@@ -1,17 +1,20 @@
 #pragma once
+
 #include "Transform.h"
 #include "Mesh.h"
 
 class GameObject
 {
 public:
-	GameObject() {}
-	GameObject(Mesh& InMesh) : Mesh(InMesh) {}
+	GameObject() = default;
+	~GameObject() {};
 
-	Transform& GetTransform();
-	Mesh& GetMesh();
+	Transform& GetTransform() { return Transform; }
+	void SetMesh(Mesh* InMeshPtr);
+	Mesh* GetMesh() { return SharedMeshPtr; }
 
 private:
 	Transform Transform;
-	Mesh Mesh;
+	Mesh* SharedMeshPtr = nullptr;
 };
+

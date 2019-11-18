@@ -10,8 +10,14 @@ public:
 	~SoftRendererImpl3D();
 
 public:
+	void LoadResource();
+	void LoadScene();
 	void RenderFrameImpl();
 	void UpdateImpl(float DeltaSeconds);
+
+private:
+	FORCEINLINE void DrawGizmo3D(Matrix4x4 InVMatrix, Matrix4x4 InPMatrix);
+	FORCEINLINE void DrawXYPlane(Matrix4x4 InVMatrix, Matrix4x4 InPMatrix);
 
 private:
 	RenderingSoftwareInterface* RSI = nullptr;
@@ -23,11 +29,10 @@ private:
 	// Input Manager
 	InputManager InputManager;
 
-	// Final Matrix
-	Matrix4x4 FinalMatrix;
-	float FOV = 60.f;
+	// Resource
+	std::unique_ptr<Mesh> SharedCubeMesh;
 
-	// Objects
-	GameObject* GameObjects;
-	int GameObjectCount = 0;
+	// GameObject
+	std::vector<std::unique_ptr<GameObject>> Scene;
+	Camera Camera;
 };

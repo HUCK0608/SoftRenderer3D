@@ -1,24 +1,31 @@
 #pragma once
 
-#include "Matrix4x4.h"
-
 class Transform
 {
 public:
-	Matrix4x4 GetTRS() const;
+	Transform() = default;
 
+	Vector3 Right = Vector3::UnitX;
+	Vector3 Up = Vector3::UnitY;
+	Vector3 Forward = Vector3::UnitZ;
+
+public:
 	void SetPosition(const Vector3& InPosition);
-	Vector3 GetPosition() { return Position; }
-
-	void SetRotation(const Vector3& InRotationDegree);
-	void SetScale(const Vector3& InScale);
-
 	void AddPosition(const Vector3& InPosition);
-	void AddRotation(const Vector3& InRotationDegree);
-	void AddScale(const Vector3& InScale);
+	void SetRotation(const Rotator& InRotation);
+	void AddYawRotation(float InDegree);
+	void AddRollRotation(float InDegree);
+	void AddPitchRotation(float InDegree);
+	void SetScale(const Vector3& InScale);
+	Matrix4x4 GetModelingMatrix() const;
+	void CalcLocalAxis();
 
 private:
-	Vector3 Position = Vector3::Zero;
-	Vector3 RotationInDegree = Vector3::Zero;
+	Vector3 Position;
+	Rotator Rotation;
 	Vector3 Scale = Vector3::One;
+
+	friend class GameObject;
+	friend class Camera;
 };
+

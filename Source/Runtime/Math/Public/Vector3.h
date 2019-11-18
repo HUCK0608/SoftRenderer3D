@@ -5,7 +5,7 @@
 struct Vector3
 {
 public:
-	Vector3() { }
+	Vector3() = default;
 	FORCEINLINE Vector3(const Vector2& InV, bool IsPoint = true) : X(InV.X), Y(InV.Y) { Z = IsPoint ? 1.f : 0.f; }
 	constexpr FORCEINLINE Vector3(float InX, float InY, float InZ) : X(InX), Y(InY), Z(InZ) { }
 
@@ -36,6 +36,8 @@ public:
 	static const Vector3 UnitZ;
 	static const Vector3 One;
 	static const Vector3 Zero;
+	static const Vector3 Infinity;
+	static const Vector3 InfinityNeg;
 
 public:
 	float X = 0.f;
