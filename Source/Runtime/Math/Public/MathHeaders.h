@@ -15,5 +15,6 @@
 #include "Color32.h"
 #include "LinearColor.h"
 
+#include "Plane.h"
 #include "BoundingBox.h"
 #include "Sphere.h"

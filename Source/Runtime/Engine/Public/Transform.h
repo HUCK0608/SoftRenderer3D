@@ -18,6 +18,7 @@ public:
 	void AddPitchRotation(float InDegree);
 	void SetScale(const Vector3& InScale);
 	Matrix4x4 GetModelingMatrix() const;
+	Vector3 GetPosition() const;
 	void CalcLocalAxis();
 
 private:

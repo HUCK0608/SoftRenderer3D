@@ -34,3 +34,13 @@ Matrix4x4 Camera::GetPerspectiveMatrix(int InScreenSizeX, int InScreenSizeY)
 		Vector4(0.f, 0.f, k, -1.f), 
 		Vector4(0.f, 0.f, l, 0.f));
 }
+
+float Camera::GetNearZ() const
+{
+	return NearZ;
+}
+
+float Camera::GetFarZ() const
+{
+	return FarZ;
+}

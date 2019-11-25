@@ -148,6 +148,11 @@ void SoftRendererImpl3D::RenderFrameImpl()
 
 		Matrix4x4 m[3] = { mMat, vMat, pMat };
 
+		// Frustum 평면 구하기
+		// Near, Far
+		Plane nearPlane = Plane(Vector3::UnitZ, -Camera.GetNearZ());
+		Plane farPlane = Plane(-Vector3::UnitZ, -Camera.GetFarZ());
+		
 		Mesh* meshToRender = player->GetMesh();
 		int vertexCount = meshToRender->GetVertexCount();
 		int indexCount = meshToRender->GetIndexCount();

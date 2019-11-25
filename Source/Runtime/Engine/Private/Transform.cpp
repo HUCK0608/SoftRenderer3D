@@ -64,6 +64,11 @@ Matrix4x4 Transform::GetModelingMatrix() const
 	return tMat * rMat * sMat;
 }
 
+Vector3 Transform::GetPosition() const
+{
+	return Position;
+}
+
 void Transform::CalcLocalAxis()
 {
 	float cy, sy, cp, sp, cr, sr;

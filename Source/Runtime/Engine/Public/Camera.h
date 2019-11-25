@@ -12,6 +12,9 @@ public:
 	Matrix4x4 GetLookAtMatrix(GameObject& InTargetObject);
 	Matrix4x4 GetPerspectiveMatrix(int InScreenSizeX, int InScreenSizeY);
 
+	float GetNearZ() const;
+	float GetFarZ() const;
+
 private:
 	Transform Transform;
 	float FOV = 60.f;
